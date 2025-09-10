@@ -262,7 +262,7 @@ void step_stop(void)
 
 void step_set_hold(hold_mode_t mode)
 {
-	g_hold = mode;
+//	g_hold = mode;
 	if (g_hold == HOLD_OFF)
 	{
 		// Immediately de-energize coils

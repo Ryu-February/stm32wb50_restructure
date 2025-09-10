@@ -61,6 +61,7 @@ void ap_tim16_callback(void)
 	if(get_current_steps() >= 1500)
 	{
 		step_coast_stop();
+		step_idx_init();
 		odometry_steps_init();
 		detected_color = COLOR_BLACK;
 	}
