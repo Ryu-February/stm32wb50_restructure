@@ -1,4 +1,4 @@
 ../App/ap/ap.c:26:6:ap_init	1
-../App/ap/ap.c:45:6:ap_main	4
-../App/ap/ap.c:70:13:ap_task_color_calibration	5
-../App/ap/ap.c:115:13:ap_task_color_detection	3
+../App/ap/ap.c:45:6:ap_main	5
+../App/ap/ap.c:81:13:ap_task_color_calibration	5
+../App/ap/ap.c:126:13:ap_task_color_detection	3

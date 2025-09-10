@@ -62,6 +62,17 @@ void ap_main(void)
 		{
 			ap_task_color_detection();
 		}
+
+
+		if(ir_is_black())
+		{
+			uart_printf("cur_color: black\r\n");
+		}
+		else
+		{
+			uart_printf("cur_ir_adc: %d\r\n",ir_read_adc());
+		}
+		delay_ms(500);
 	}
 }
 
