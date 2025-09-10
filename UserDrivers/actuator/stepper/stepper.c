@@ -36,7 +36,7 @@ static StepLL left = {
 	.step_idx = 0,
 	.period_ticks = 1000,
 	.prev_tick = 0,
-	.total_step = 0,
+	.odometry_steps = 0,
 #if (_USE_STEP_NUM == _STEP_NUM_119)
 	.dir_sign = -1,
 #else
@@ -54,7 +54,7 @@ static StepLL right = {
 	.step_idx = 0,
 	.period_ticks = 1000,
 	.prev_tick = 0,
-	.total_step = 0,
+	.odometry_steps = 0,
 	#if (_USE_STEP_NUM == _STEP_NUM_119)
 	.dir_sign = +1,
 	#else
@@ -63,7 +63,16 @@ static StepLL right = {
 };
 
 
+// Run/hold flags
+static volatile uint8_t left_run = 0;
+static volatile uint8_t right_run = 0;
+static volatile hold_mode_t g_hold = HOLD_BRAKE;
+
 // ---- LUTs ----
+
+//sin table
+//360도를 32스텝으로 쪼갰을 때 11.25가 나오는데 11.25도의 간격을 pwm으로 표현하면 이렇게 나옴
+//여기서 말하는 360은 전류 벡터의 회전 경로가 360도라는 거고 모터는 동일하게 72도를 기준으로 잡음
 #if (_USE_STEP_MODE == _STEP_MODE_MICRO)
 	const uint8_t step_table[32] = {			//sin(degree) -> pwm
 	  128, 152, 176, 198, 218, 234, 245, 253,
@@ -73,6 +82,7 @@ static StepLL right = {
 	};
 #elif (_USE_STEP_MODE == _STEP_MODE_FULL)
 	static const uint8_t step_table[4][4] = {
+		//72°를 돎(step angle이 18°라서)
 		{1,0,1,0},
 		{0,1,1,0},
 		{0,1,0,1},
@@ -95,7 +105,7 @@ static StepLL right = {
 // ---- Helpers ----
 static inline uint32_t diff_u32(uint32_t a, uint32_t b)
 {
-	return (uint32_t)(a-b);
+	return (uint32_t)(a - b);
 }
 
 
@@ -106,15 +116,15 @@ static inline void gpio_pwm4(
 	GPIO_TypeDef* p4, uint16_t b4,
 	uint8_t now, uint8_t vA, uint8_t vB)
 {
-	uint32_t set1 = (now < vA) ? b1 : 0, rst1 = (now < vA) ? 0 : ((uint32_t)b1 << 16);
-	uint32_t set2 = (now < (uint8_t)(255 - vA)) ? b2 : 0, rst2 = (now < (uint8_t)(255 - vA)) ? 0 : ((uint32_t)b2 << 16);
-	uint32_t set3 = (now < vB) ? b3 : 0, rst3 = (now < vB) ? 0 : ((uint32_t)b3 << 16);
-	uint32_t set4 = (now < (uint8_t)(255 - vB)) ? b4 : 0, rst4 = (now < (uint8_t)(255 - vB)) ? 0 : ((uint32_t)b4 << 16);
+	uint32_t set1 = (now < vA) ? b1 : 0, 					rst1 = (now < vA) ? 0 : ((uint32_t)b1 << 16);
+	uint32_t set2 = (now < (uint8_t)(255 - vA)) ? b2 : 0, 	rst2 = (now < (uint8_t)(255 - vA)) ? 0 : ((uint32_t)b2 << 16);
+	uint32_t set3 = (now < vB) ? b3 : 0, 					rst3 = (now < vB) ? 0 : ((uint32_t)b3 << 16);
+	uint32_t set4 = (now < (uint8_t)(255 - vB)) ? b4 : 0, 	rst4 = (now < (uint8_t)(255 - vB)) ? 0 : ((uint32_t)b4 << 16);
 
-	p1->BSRR = set1 | rst1;
-	p2->BSRR = set2 | rst2;
-	p3->BSRR = set3 | rst3;
-	p4->BSRR = set4 | rst4;
+	p1->BSRR = set1 | rst1;//A+
+	p2->BSRR = set2 | rst2;//A-
+	p3->BSRR = set3 | rst3;//B+
+	p4->BSRR = set4 | rst4;//B-
 }
 
 
@@ -123,10 +133,12 @@ static inline void apply_pwm_micro(StepLL* m, uint8_t now)
 #if (_USE_STEP_MODE == _STEP_MODE_MICRO)
 	uint8_t vA = step_table[m->step_idx & STEP_MASK];
 	uint8_t vB = step_table[(m->step_idx + (STEP_TABLE_SIZE >> 2)) & STEP_MASK];
+	//(STEP_MASK >> 2) == 8 == 90°(difference sin with cos)
+	//sin파와 cos파의 위상 차가 90도가 나니까 +8을 한 거임 +8은 32를 360도로 치환했을 때 90도를 의미함
 
 	gpio_pwm4(m->in1p, m->in1b, m->in2p, m->in2b, m->in3p, m->in3b, m->in4p, m->in4b, now, vA, vB);
 #else
-	(void)now; // silent
+	(void)m; (void)now; // silent
 #endif
 }
 
@@ -153,7 +165,7 @@ static inline void try_advance(StepLL* m, uint32_t now_tick)
 	if (diff_u32(now_tick, m->prev_tick) >= m->period_ticks)
 	{
 		m->prev_tick = now_tick;
-		m->total_step++;
+		m->odometry_steps++;
 		m->step_idx = (uint16_t)((m->step_idx + m->dir_sign) & STEP_MASK);
 	}
 }
@@ -163,7 +175,9 @@ void step_init_all(void)
 {
 	left.step_idx = right.step_idx = 0;
 	left.prev_tick = right.prev_tick = read_tick32();
-	left.total_step = right.total_step = 0;
+	left.odometry_steps = right.odometry_steps = 0;
+	left_run = right_run = 0;
+	g_hold = HOLD_BRAKE;
 }
 
 
@@ -180,6 +194,20 @@ void step_tick_isr(void)
 	uint32_t tick_now = read_tick32(); // free‑running tick (wraps) | tim2
 
 
+	// If coils are off, ensure outputs low and skip any motion
+	if (g_hold == HOLD_OFF)
+	{
+		left.in1p->BSRR = ((uint32_t)left.in1b << 16);
+		left.in2p->BSRR = ((uint32_t)left.in2b << 16);
+		left.in3p->BSRR = ((uint32_t)left.in3b << 16);
+		left.in4p->BSRR = ((uint32_t)left.in4b << 16);
+		right.in1p->BSRR = ((uint32_t)right.in1b << 16);
+		right.in2p->BSRR = ((uint32_t)right.in2b << 16);
+		right.in3p->BSRR = ((uint32_t)right.in3b << 16);
+		right.in4p->BSRR = ((uint32_t)right.in4b << 16);
+		return;
+	}
+
 	#if (_USE_STEP_MODE == _STEP_MODE_MICRO)
 	apply_pwm_micro(&left, pwm_now);
 	apply_pwm_micro(&right, pwm_now);
@@ -187,6 +215,14 @@ void step_tick_isr(void)
 	apply_coils_table(&left);
 	apply_coils_table(&right);
 	#endif
+//	if (left_run)
+//	{
+//		try_advance(&left, tick_now);
+//	}
+//	if (right_run)
+//	{
+//		try_advance(&right, tick_now);
+//	}
 	try_advance(&left, tick_now);
 	try_advance(&right, tick_now);
 }
@@ -208,31 +244,57 @@ void step_set_dir(int8_t left_sign, int8_t right_sign)
 
 void step_stop(void)
 {
-	// brake = 4핀 모두 High (A3916 보드 동작 확인 필요)
-	left.in1p->BSRR = left.in1b;
-	left.in2p->BSRR = left.in2b;
-	left.in3p->BSRR = left.in3b;
-	left.in4p->BSRR = left.in4b;
+//	// brake = 4핀 모두 High (A3916 보드 동작 확인 필요)
+//	left.in1p->BSRR = left.in1b;
+//	left.in2p->BSRR = left.in2b;
+//	left.in3p->BSRR = left.in3b;
+//	left.in4p->BSRR = left.in4b;
+//
+//
+//	right.in1p->BSRR = right.in1b;
+//	right.in2p->BSRR = right.in2b;
+//	right.in3p->BSRR = right.in3b;
+//	right.in4p->BSRR = right.in4b;
 
+	// Stop advancing only. Hold mode is respected by ISR.
+	left_run = right_run = 0;
+}
 
-	right.in1p->BSRR = right.in1b;
-	right.in2p->BSRR = right.in2b;
-	right.in3p->BSRR = right.in3b;
-	right.in4p->BSRR = right.in4b;
+void step_set_hold(hold_mode_t mode)
+{
+	g_hold = mode;
+	if (g_hold == HOLD_OFF)
+	{
+		// Immediately de-energize coils
+		left.in1p->BSRR = ((uint32_t)left.in1b << 16);
+		left.in2p->BSRR = ((uint32_t)left.in2b << 16);
+		left.in3p->BSRR = ((uint32_t)left.in3b << 16);
+		left.in4p->BSRR = ((uint32_t)left.in4b << 16);
+		right.in1p->BSRR = ((uint32_t)right.in1b << 16);
+		right.in2p->BSRR = ((uint32_t)right.in2b << 16);
+		right.in3p->BSRR = ((uint32_t)right.in3b << 16);
+		right.in4p->BSRR = ((uint32_t)right.in4b << 16);
+	}
+}
+
+void step_coast_stop(void)
+{
+	step_stop();				//run = 0
+	step_set_hold(HOLD_OFF);	//coils off
 }
 
 
 uint32_t get_current_steps(void)
 {
-	uint32_t l = left.total_step; // single 32b read is atomic on M4
-	uint32_t r = right.total_step;
+	uint32_t l = left.odometry_steps; // single 32b read is atomic on M4
+	uint32_t r = right.odometry_steps;
 	return (l + r) / 2u;
 }
 
 
-void total_step_init(void)
+void odometry_steps_init(void)
 {
-	left.total_step = right.total_step = 0;
+	left.odometry_steps = right.odometry_steps = 0;
 }
 
 

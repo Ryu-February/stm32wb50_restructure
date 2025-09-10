@@ -57,6 +57,13 @@ void ap_tim16_callback(void)
 			step_tick_isr();
 			break;
 	}
+
+	if(get_current_steps() >= 1500)
+	{
+		step_coast_stop();
+		odometry_steps_init();
+		detected_color = COLOR_BLACK;
+	}
 }
 
 void ap_tim17_callback(void)

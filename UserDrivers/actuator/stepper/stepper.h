@@ -56,19 +56,26 @@
 
 // ---------------- Types ----------------
 // ISR‑safe POD struct for one motor
-typedef struct {
-	GPIO_TypeDef* in1p; uint16_t in1b; // bit mask (e.g., GPIO_PIN_0)
-	GPIO_TypeDef* in2p; uint16_t in2b;
-	GPIO_TypeDef* in3p; uint16_t in3b;
-	GPIO_TypeDef* in4p; uint16_t in4b;
+typedef struct
+{
+	GPIO_TypeDef* in1p; 	uint16_t in1b; // bit mask (e.g., GPIO_PIN_0)
+	GPIO_TypeDef* in2p; 	uint16_t in2b;
+	GPIO_TypeDef* in3p; 	uint16_t in3b;
+	GPIO_TypeDef* in4p; 	uint16_t in4b;
 
 
-	volatile uint16_t step_idx; // 0..STEP_MASK (wraps via mask)
-	volatile uint32_t period_ticks; // tick source = TIMx (1us or similar)
-	volatile uint32_t prev_tick; // last index advance time
-	volatile uint32_t total_step; // for telemetry (atomic on M4)
-	int8_t dir_sign; // +1 / -1 (compile to single add)
+	volatile uint16_t 	step_idx; // 0..STEP_MASK (wraps via mask)
+	volatile uint32_t 	period_ticks; // tick source = TIMx (1us or similar)
+	volatile uint32_t 	prev_tick; // last index advance time
+	volatile uint32_t 	odometry_steps; // for telemetry (atomic on M4)
+			 int8_t 	dir_sign; // +1 / -1 (compile to single add)
 } StepLL;
+
+typedef enum
+{
+	HOLD_OFF 	= 0,	//coils off(freewheel)
+	HOLD_BRAKE	= 1		//coils energized(hold torque)
+}hold_mode_t;
 
 
 // High‑level operations kept for API compatibility
@@ -96,11 +103,12 @@ void step_tick_isr(void);
 void step_set_period_ticks(uint32_t left_ticks, uint32_t right_ticks); // unit = tick source period
 void step_set_dir(int8_t left_sign, int8_t right_sign); // +1 or -1
 void step_stop(void); // brake both
+void step_coast_stop(void);
 
 
 // 4) Telemetry
 uint32_t get_current_steps(void);
-void total_step_init(void);
+void odometry_steps_init(void);
 
 
 // 5) Compatibility helpers (keep your existing higher‑level code working)
@@ -109,10 +117,10 @@ void step_drive_ratio(uint16_t left_ticks, uint16_t right_ticks);
 
 
 // Mappings you already used
-StepOperation mode_to_step(color_mode_t mode);
-uint16_t mode_to_step_count(color_mode_t mode);
-uint16_t mode_to_left_period(color_mode_t mode);
-uint16_t mode_to_right_period(color_mode_t mode);
+StepOperation 	mode_to_step(color_mode_t mode);
+uint16_t 		mode_to_step_count(color_mode_t mode);
+uint16_t 		mode_to_left_period(color_mode_t mode);
+uint16_t 		mode_to_right_period(color_mode_t mode);
 
 
 // Optional util if you still convert from RPM/PWM in main thread
