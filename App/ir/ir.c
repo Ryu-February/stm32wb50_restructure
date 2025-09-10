@@ -22,7 +22,7 @@ uint16_t ir_read_adc(void)
 	return val; // 0~4095
 }
 
-uint8_t ir_is_black(void)
+uint8_t ir_is_black(void)//ADC range for reference black surface: 5-11
 {
     return (ir_read_adc() <= IR_THRESHOLD) ? 1 : 0;
 }

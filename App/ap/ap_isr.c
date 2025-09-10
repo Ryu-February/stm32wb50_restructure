@@ -10,6 +10,7 @@
 #include "rgb.h"
 #include "color.h"
 #include "input.h"
+#include "stepper.h"
 
 volatile uint32_t timer17_ms;
 volatile bool check_color;
@@ -45,6 +46,17 @@ void ap_tim2_callback(void)
 void ap_tim16_callback(void)
 {
 	rgb_set_color(detected_color);
+
+	if(detected_color == COLOR_BLACK)
+		return;
+
+	switch (detected_color)
+	{
+		case COLOR_RED :
+//			step_drive(OP_FORWARD);
+			step_tick_isr();
+			break;
+	}
 }
 
 void ap_tim17_callback(void)

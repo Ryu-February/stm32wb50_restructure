@@ -37,6 +37,7 @@
 "./Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart_ex.o"
 "./Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_adc.o"
 "./Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rcc.o"
+"./UserDrivers/actuator/stepper/stepper.o"
 "./UserDrivers/bsp/i2c/i2c.o"
 "./UserDrivers/bsp/uart/uart.o"
 "./UserDrivers/components/flash/flash.o"

@@ -51,7 +51,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/bsp/uart/uart.h \
  C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/components/flash/flash.h \
  C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/color/color.h \
- C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/input/input.h
+ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/input/input.h \
+ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/actuator/stepper/stepper.h
 ../Core/Inc/main.h:
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal.h:
 ../Core/Inc/stm32wbxx_hal_conf.h:
@@ -106,3 +107,4 @@ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/bsp/uart/ua
 C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/components/flash/flash.h:
 C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/color/color.h:
 C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/input/input.h:
+C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/actuator/stepper/stepper.h:

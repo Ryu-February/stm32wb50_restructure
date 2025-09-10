@@ -33,6 +33,7 @@ App/rgb \
 Core/Src \
 Core/Startup \
 Drivers/STM32WBxx_HAL_Driver/Src \
+UserDrivers/actuator/stepper \
 UserDrivers/bsp/i2c \
 UserDrivers/bsp/uart \
 UserDrivers/components/flash \

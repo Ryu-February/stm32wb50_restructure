@@ -1,4 +1,6 @@
-App/ap/ap_isr.o: ../App/ap/ap_isr.c ../App/ap/ap_isr.h \
+UserDrivers/actuator/stepper/stepper.o: \
+ ../UserDrivers/actuator/stepper/stepper.c \
+ ../UserDrivers/actuator/stepper/stepper.h \
  C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/common/def.h \
  ../Core/Inc/main.h ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal.h \
  ../Core/Inc/stm32wbxx_hal_conf.h \
@@ -41,11 +43,10 @@ App/ap/ap_isr.o: ../App/ap/ap_isr.c ../App/ap/ap_isr.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_uart.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_uart_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_system.h \
- C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/rgb/rgb.h \
  C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/color/color.h \
- C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/input/input.h \
- C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/actuator/stepper/stepper.h
-../App/ap/ap_isr.h:
+ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/rgb/rgb.h \
+ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/bsp/uart/uart.h
+../UserDrivers/actuator/stepper/stepper.h:
 C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/common/def.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal.h:
@@ -89,7 +90,6 @@ C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/common/def.h:
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_uart.h:
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_uart_ex.h:
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_system.h:
-C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/rgb/rgb.h:
 C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/color/color.h:
-C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/input/input.h:
-C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/actuator/stepper/stepper.h:
+C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/App/rgb/rgb.h:
+C:/Workspace/STM32WB50_HANGIL/STM32WB_Hangil_restructure/UserDrivers/bsp/uart/uart.h:

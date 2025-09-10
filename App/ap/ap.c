@@ -9,6 +9,7 @@
 #include "ap.h"
 
 
+extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim16;
 extern TIM_HandleTypeDef htim17;
 
@@ -32,7 +33,9 @@ void ap_init(void)
 	rgb_init();
 	color_init();
 //	step_motor_init();
+	step_init_all();
 
+	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start_IT(&htim16);
 	HAL_TIM_Base_Start_IT(&htim17);
 
@@ -62,17 +65,6 @@ void ap_main(void)
 		{
 			ap_task_color_detection();
 		}
-
-
-		if(ir_is_black())
-		{
-			uart_printf("cur_color: black\r\n");
-		}
-		else
-		{
-			uart_printf("cur_ir_adc: %d\r\n",ir_read_adc());
-		}
-		delay_ms(500);
 	}
 }
 

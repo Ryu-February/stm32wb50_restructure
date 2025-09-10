@@ -12,6 +12,7 @@ RM := rm -rf
 -include UserDrivers/components/flash/subdir.mk
 -include UserDrivers/bsp/uart/subdir.mk
 -include UserDrivers/bsp/i2c/subdir.mk
+-include UserDrivers/actuator/stepper/subdir.mk
 -include Drivers/STM32WBxx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk

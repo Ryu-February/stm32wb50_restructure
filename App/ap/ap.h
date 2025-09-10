@@ -17,10 +17,10 @@
 #include "rgb.h"
 #include "i2c.h"
 #include "uart.h"
-//#include "step.h"
 #include "flash.h"
 #include "color.h"
 #include "input.h"
+#include "stepper.h"
 
 
 
