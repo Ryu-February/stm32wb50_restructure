@@ -1,0 +1,2 @@
+../UserDrivers/bsp/uart/uart.c:18:6:uart_init	1
+../UserDrivers/bsp/uart/uart.c:24:6:uart_printf	1

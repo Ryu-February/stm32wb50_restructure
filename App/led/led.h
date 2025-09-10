@@ -1,7 +1,7 @@
 /*
  * led.h
  *
- *  Created on: Sep 8, 2025
+ *  Created on: Sep 9, 2025
  *      Author: RCY
  */
 
@@ -12,11 +12,10 @@
 #include "def.h"
 
 
-void led_init(uint8_t ch);
+void led_init(void);
 void led_on(uint8_t ch);
 void led_off(uint8_t ch);
 void led_toggle(uint8_t ch);
-
 
 
 #endif /* LED_LED_H_ */

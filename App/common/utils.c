@@ -1,7 +1,7 @@
 /*
  * utils.c
  *
- *  Created on: Sep 8, 2025
+ *  Created on: Sep 9, 2025
  *      Author: RCY
  */
 
@@ -16,7 +16,6 @@ void delay_ms(uint32_t ms)
 {
 	HAL_Delay(ms);
 }
-
 
 uint32_t millis(void)
 {

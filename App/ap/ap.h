@@ -9,10 +9,20 @@
 #define AP_AP_H_
 
 
-#include "def.h"
+#include "utils.h"
 
-
+#include "ir.h"
 #include "led.h"
+//#include "pwm.h"
+#include "rgb.h"
+#include "i2c.h"
+#include "uart.h"
+//#include "step.h"
+#include "flash.h"
+#include "color.h"
+#include "input.h"
+
+
 
 
 void ap_init(void);

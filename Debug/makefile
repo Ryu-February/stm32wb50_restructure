@@ -9,16 +9,17 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include UserDrivers/components/flash/subdir.mk
+-include UserDrivers/bsp/uart/subdir.mk
+-include UserDrivers/bsp/i2c/subdir.mk
 -include Drivers/STM32WBxx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
--include App/stepper/subdir.mk
 -include App/rgb/subdir.mk
 -include App/led/subdir.mk
 -include App/ir/subdir.mk
 -include App/input/subdir.mk
 -include App/common/subdir.mk
--include App/command/subdir.mk
 -include App/color/subdir.mk
 -include App/buzzer/subdir.mk
 -include App/ap/subdir.mk
@@ -71,7 +72,7 @@ main-build: STM32WB_Hangil_restructure.elf secondary-outputs
 
 # Tool invocations
 STM32WB_Hangil_restructure.elf STM32WB_Hangil_restructure.map: $(OBJS) $(USER_OBJS) C:\Workspace\STM32WB50_HANGIL\STM32WB_Hangil_restructure\STM32WB50CGUX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32WB_Hangil_restructure.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Workspace\STM32WB50_HANGIL\STM32WB_Hangil_restructure\STM32WB50CGUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32WB_Hangil_restructure.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "STM32WB_Hangil_restructure.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Workspace\STM32WB50_HANGIL\STM32WB_Hangil_restructure\STM32WB50CGUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32WB_Hangil_restructure.map" -Wl,--gc-sections -static -Wl,--no-warn-rwx-segment -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

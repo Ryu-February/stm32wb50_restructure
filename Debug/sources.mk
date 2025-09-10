@@ -25,14 +25,15 @@ SUBDIRS := \
 App/ap \
 App/buzzer \
 App/color \
-App/command \
 App/common \
 App/input \
 App/ir \
 App/led \
 App/rgb \
-App/stepper \
 Core/Src \
 Core/Startup \
 Drivers/STM32WBxx_HAL_Driver/Src \
+UserDrivers/bsp/i2c \
+UserDrivers/bsp/uart \
+UserDrivers/components/flash \
 

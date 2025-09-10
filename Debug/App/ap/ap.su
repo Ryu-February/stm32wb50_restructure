@@ -1,2 +1,4 @@
-../App/ap/ap.c:13:6:ap_init	8	static
-../App/ap/ap.c:19:6:ap_main	8	static
+../App/ap/ap.c:26:6:ap_init	8	static
+../App/ap/ap.c:45:6:ap_main	8	static
+../App/ap/ap.c:70:13:ap_task_color_calibration	32	static
+../App/ap/ap.c:115:13:ap_task_color_detection	24	static
