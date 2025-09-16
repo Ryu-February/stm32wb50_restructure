@@ -270,6 +270,11 @@ void step_set_period_ticks(uint32_t left_ticks, uint32_t right_ticks)
 }
 
 
+static inline int8_t sgn3(int8_t s)
+{
+	return (s > 0) ? +1 : (s < 0 ? -1 : 0);
+}
+
 void step_set_dir(int8_t left_sign, int8_t right_sign)
 {
 #if (_USE_STEP_NUM == _STEP_NUM_119)
@@ -280,8 +285,8 @@ void step_set_dir(int8_t left_sign, int8_t right_sign)
     const int8_t R = -1;
 #endif
 
-    left.dir_sign  = ((left_sign  >= 0) ? +1 : -1) * L;
-    right.dir_sign = ((right_sign >= 0) ? +1 : -1) * R;
+    left.dir_sign  = (int8_t)(sgn3(left_sign) * L);
+    right.dir_sign = (int8_t)(sgn3(right_sign) * R);
 }
 
 
@@ -376,7 +381,7 @@ void step_drive(StepOperation op)
 			step_set_dir(+1, -1);
 			break;
 		case OP_STOP:
-			step_stop();
+			step_set_hold(HOLD_BRAKE);
 			break;
 		default:
 			break;

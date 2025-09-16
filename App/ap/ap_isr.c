@@ -50,8 +50,6 @@ void ap_tim16_callback(void)
 	if(detected_color == COLOR_BLACK)
 		return;
 
-	step_tick_isr();
-
 	switch (detected_color)
 	{
 		case COLOR_RED :
@@ -67,11 +65,13 @@ void ap_tim16_callback(void)
 			step_drive(OP_TURN_LEFT);
 			break;
 		default :
-			step_drive(OP_STOP);
+			step_drive(OP_NONE);
 			break;
 	}
 
-	if(get_current_steps() >= 1500)
+	step_tick_isr();
+
+	if(get_current_steps() >= 1000)
 	{
 		step_coast_stop();
 		step_idx_init();
