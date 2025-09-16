@@ -1,4 +1,0 @@
-../App/input/input.c:24:6:input_exti_triggered	16	static
-../App/input/input.c:29:6:input_update	16	static
-../App/input/input.c:53:6:input_is_short_pressed	24	static
-../App/input/input.c:60:6:input_is_long_pressed	24	static

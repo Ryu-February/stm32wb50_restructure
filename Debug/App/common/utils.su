@@ -1,2 +1,0 @@
-../App/common/utils.c:15:6:delay_ms	16	static
-../App/common/utils.c:20:10:millis	8	static

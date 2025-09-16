@@ -1,3 +1,0 @@
-../App/rgb/rgb.c:29:6:rgb_init	1
-../App/rgb/rgb.c:34:6:rgb_set_color	2
-../App/rgb/rgb.c:42:6:rgb_set_pwm	4

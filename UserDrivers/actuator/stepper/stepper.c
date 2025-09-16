@@ -10,6 +10,38 @@
 
 #include "uart.h"
 
+/*                            Motor(15BY25-119)                         */
+/*                           Motor driver(A3916)                        */
+
+/************************************************************************/
+/*                       MCU  |     NET    | DRIVER                     */
+/*                       PA0 -> MOT_L_IN1 ->  IN1                       */
+/*                       PA1 -> MOT_L_IN2 ->  IN2                       */
+/*                       PA2 -> MOT_L_IN3 ->  IN3                       */
+/*                       PA3 -> MOT_L_IN4 ->  IN4                       */
+/*                                                                      */
+/*                       PB4 -> MOT_R_IN1 ->  IN1                       */
+/*                       PB5 -> MOT_R_IN2 ->  IN2                       */
+/*                       PB6 -> MOT_R_IN3 ->  IN3                       */
+/*                       PB7 -> MOT_R_IN4 ->  IN4                       */
+/************************************************************************/
+
+/*
+ * A3916 Stepper Motor Operation Table (Half Step + Full Step)
+ *
+ * IN1 IN2 IN3 IN4 | OUT1A OUT1B OUT2A OUT2B | Function
+ * --------------------------------------------------------
+ *  0   0   0   0  |  Off   Off   Off   Off   | Disabled
+ *  1   0   1   0  |  High  Low   High  Low   | Full Step 1 / 	½ Step 1
+ *  0   0   1   0  |  Off   Off   High  Low   |             	½ Step 2
+ *  0   1   1   0  |  Low   High  High  Low   | Full Step 2 /	½ Step 3
+ *  0   1   0   0  |  Low   High  Off   Off   |             	½ Step 4
+ *  0   1   0   1  |  Low   High  Low   High  | Full Step 3 / 	½ Step 5
+ *  0   0   0   1  |  Off   Off   Low   High  |             	½ Step 6
+ *  1   0   0   1  |  High  Low   Low   High  | Full Step 4 / 	½ Step 7
+ *  1   0   0   0  |  High  Low   Off   Off   |             	½ Step 8
+ */
+
 
 // ---- External timers (provide from your BSP) ----
 // TIM_PWM_CNT: ARR must be 255; we only read CNT (0..255) for software PWM compare
@@ -178,6 +210,8 @@ void step_init_all(void)
 	left.odometry_steps = right.odometry_steps = 0;
 	left_run = right_run = 0;
 	g_hold = HOLD_BRAKE;
+
+	step_stop();
 }
 
 
@@ -201,6 +235,7 @@ void step_tick_isr(void)
 		left.in2p->BSRR = ((uint32_t)left.in2b << 16);
 		left.in3p->BSRR = ((uint32_t)left.in3b << 16);
 		left.in4p->BSRR = ((uint32_t)left.in4b << 16);
+
 		right.in1p->BSRR = ((uint32_t)right.in1b << 16);
 		right.in2p->BSRR = ((uint32_t)right.in2b << 16);
 		right.in3p->BSRR = ((uint32_t)right.in3b << 16);
@@ -237,8 +272,16 @@ void step_set_period_ticks(uint32_t left_ticks, uint32_t right_ticks)
 
 void step_set_dir(int8_t left_sign, int8_t right_sign)
 {
-	left.dir_sign = (left_sign >= 0) ? +1 : -1;
-	right.dir_sign = (right_sign >= 0) ? +1 : -1;
+#if (_USE_STEP_NUM == _STEP_NUM_119)
+    const int8_t L = -1;   // left motor polarity
+    const int8_t R = +1;   // right motor polarity
+#else
+    const int8_t L = +1;
+    const int8_t R = -1;
+#endif
+
+    left.dir_sign  = ((left_sign  >= 0) ? +1 : -1) * L;
+    right.dir_sign = ((right_sign >= 0) ? +1 : -1) * R;
 }
 
 
@@ -262,25 +305,39 @@ void step_stop(void)
 
 void step_set_hold(hold_mode_t mode)
 {
-//	g_hold = mode;
-	if (g_hold == HOLD_OFF)
+	g_hold = mode;
+
+	if (g_hold == HOLD_OFF)// Coast: INx=0,0
 	{
 		// Immediately de-energize coils
 		left.in1p->BSRR = ((uint32_t)left.in1b << 16);
 		left.in2p->BSRR = ((uint32_t)left.in2b << 16);
 		left.in3p->BSRR = ((uint32_t)left.in3b << 16);
 		left.in4p->BSRR = ((uint32_t)left.in4b << 16);
+
 		right.in1p->BSRR = ((uint32_t)right.in1b << 16);
 		right.in2p->BSRR = ((uint32_t)right.in2b << 16);
 		right.in3p->BSRR = ((uint32_t)right.in3b << 16);
 		right.in4p->BSRR = ((uint32_t)right.in4b << 16);
+	}
+	else   // Short-Brake: INx=1,1  (A3916 브레이크 모드)
+	{
+		left.in1p->BSRR = left.in1b;
+		left.in2p->BSRR = left.in2b;
+		left.in3p->BSRR = left.in3b;
+		left.in4p->BSRR = left.in4b;
+
+		right.in1p->BSRR = right.in1b;
+		right.in2p->BSRR = right.in2b;
+		right.in3p->BSRR = right.in3b;
+		right.in4p->BSRR = right.in4b;
 	}
 }
 
 void step_coast_stop(void)
 {
 	step_stop();				//run = 0
-	step_set_hold(HOLD_OFF);	//coils off
+	step_set_hold(HOLD_BRAKE);	//coils off
 }
 
 
@@ -303,6 +360,9 @@ void step_drive(StepOperation op)
 {
 	switch(op)
 	{
+		case OP_NONE:
+			step_set_dir(0, 0);
+			break;
 		case OP_FORWARD:
 			step_set_dir(+1, +1);
 			break;

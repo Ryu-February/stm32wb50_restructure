@@ -65,6 +65,7 @@ void ap_main(void)
 		{
 			ap_task_color_detection();
 		}
+
 	}
 }
 

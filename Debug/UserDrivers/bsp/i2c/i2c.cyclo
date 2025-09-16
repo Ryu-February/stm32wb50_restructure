@@ -1,3 +1,0 @@
-../UserDrivers/bsp/i2c/i2c.c:12:6:i2c_init	1
-../UserDrivers/bsp/i2c/i2c.c:43:6:i2c_write	4
-../UserDrivers/bsp/i2c/i2c.c:60:9:i2c_read	5

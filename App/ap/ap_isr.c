@@ -50,11 +50,24 @@ void ap_tim16_callback(void)
 	if(detected_color == COLOR_BLACK)
 		return;
 
+	step_tick_isr();
+
 	switch (detected_color)
 	{
 		case COLOR_RED :
-//			step_drive(OP_FORWARD);
-			step_tick_isr();
+			step_drive(OP_REVERSE);
+			break;
+		case COLOR_YELLOW :
+			step_drive(OP_TURN_RIGHT);
+			break;
+		case COLOR_GREEN :
+			step_drive(OP_FORWARD);
+			break;
+		case COLOR_BLUE :
+			step_drive(OP_TURN_LEFT);
+			break;
+		default :
+			step_drive(OP_STOP);
 			break;
 	}
 
@@ -65,6 +78,8 @@ void ap_tim16_callback(void)
 		odometry_steps_init();
 		detected_color = COLOR_BLACK;
 	}
+
+
 }
 
 void ap_tim17_callback(void)
