@@ -16,12 +16,14 @@ extern TIM_HandleTypeDef htim17;
 volatile uint8_t detected_color = COLOR_BLACK;
 volatile bool color_calibration = false;
 extern volatile bool check_color;
+extern volatile bool stepper_enable_evt;
 
 static bool init_printed = false;
 static uint8_t color_seq = 0;
 
 static void ap_task_color_calibration(void);
 static void ap_task_color_detection(void);
+static void enable_stepper_after_1s(void);
 
 
 void ap_init(void)
@@ -64,8 +66,8 @@ void ap_main(void)
 		else
 		{
 			ap_task_color_detection();
+			enable_stepper_after_1s();
 		}
-
 	}
 }
 
@@ -136,5 +138,22 @@ static void ap_task_color_detection(void)
 	}
 
 	check_color = false;
+}
+
+static void enable_stepper_after_1s(void)
+{
+	if(detected_color == COLOR_BLACK)
+		return;
+
+	static uint32_t t = 0;
+	uint32_t now = millis();
+
+	if(t == 0)	t = now;
+
+	if((uint32_t)now - t > 1000)
+	{
+		t = 0;
+		stepper_enable_evt = true;
+	}
 }
 

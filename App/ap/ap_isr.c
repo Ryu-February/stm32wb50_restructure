@@ -16,6 +16,7 @@ volatile uint32_t timer17_ms;
 volatile bool check_color;
 
 extern volatile uint8_t detected_color;
+volatile bool stepper_enable_evt = false;
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -50,6 +51,9 @@ void ap_tim16_callback(void)
 	if(detected_color == COLOR_BLACK)
 		return;
 
+	if(stepper_enable_evt != true)
+		return;
+
 	switch (detected_color)
 	{
 		case COLOR_RED :
@@ -71,12 +75,13 @@ void ap_tim16_callback(void)
 
 	step_tick_isr();
 
-	if(get_current_steps() >= 1000)
+	if(get_current_steps() >= 1200)
 	{
 		step_coast_stop();
 		step_idx_init();
 		odometry_steps_init();
 		detected_color = COLOR_BLACK;
+		stepper_enable_evt = false;
 	}
 
 
