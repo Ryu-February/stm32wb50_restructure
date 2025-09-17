@@ -165,10 +165,10 @@ void line_tracing_update(uint32_t now_ms)
 
     step_drive_ratio((uint16_t)left_ticks, (uint16_t)right_ticks);
 
-//	uart_printf("g_cfg_base_ticks: %d\r\n", g_cfg.base_ticks);
-//	uart_printf("g_cfg_min_ticks: %d\r\n", g_cfg.min_ticks);
-//	uart_printf("g_cfg_max_ticks: %d\r\n", g_cfg.max_ticks);
-//	uart_printf("left_ticks: %d | right_ticks: %d\r\n", left_ticks, right_ticks);
+	uart_printf("g_cfg_base_ticks: %d\r\n", g_cfg.base_ticks);
+	uart_printf("g_cfg_min_ticks: %d\r\n", g_cfg.min_ticks);
+	uart_printf("g_cfg_max_ticks: %d\r\n", g_cfg.max_ticks);
+	uart_printf("left_ticks: %d | right_ticks: %d\r\n", left_ticks, right_ticks);
 
     // (옵션) 디버깅
     // uart_printf("[LT] lb:%lu rb:%lu err:%0.2f out:%0.2f L:%0.1f R:%0.1f\r\n",

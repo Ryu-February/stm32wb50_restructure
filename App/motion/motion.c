@@ -36,7 +36,7 @@ static const uint16_t kStepsByColor[COLOR_COUNT] =
     [COLOR_YELLOW]   = 1020,
     [COLOR_GREEN]    = 1500,
     [COLOR_BLUE]     = 1020,
-	[COLOR_PURPLE]	 = 5000,
+	[COLOR_PURPLE]	 = 15000,
     // ORANGE, PURPLE, ... 등은 0으로 남음
 };
 

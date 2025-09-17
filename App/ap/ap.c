@@ -35,7 +35,7 @@ static void ap_motion_update(void);
 
 const lt_config_t lt =
 {
-	.Kp = 20.f, .Ki = 0.f, .Kd = 15.f,
+	.Kp = 30.f, .Ki = 0.f, .Kd = 15.f,
 	.base_ticks = 1500, .min_ticks = 500, .max_ticks = 2500,
 	.interval_ms = 5
 };
@@ -220,6 +220,9 @@ static void ap_motion_update(void)
 		// 라인트레이싱이 이미 켜져 있을 때:
 		//  - 계속 업데이트
 		//  - 보라/검정이 아닌 다른 색이 1초 유지되면 라인트레이싱 종료
+		if(stepper_enable_evt != true)
+			return;
+
 		line_tracing_update(timer17_ms);
 
 		if (detected_color != COLOR_PURPLE && detected_color != COLOR_BLACK)

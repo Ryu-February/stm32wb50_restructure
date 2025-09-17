@@ -66,7 +66,7 @@ static StepLL left = {
 	.in4p = GPIOA, .in4b = GPIO_PIN_3,
 
 	.step_idx = 0,
-	.period_ticks = 1000,
+	.period_ticks = 500,
 	.prev_tick = 0,
 	.odometry_steps = 0,
 #if (_USE_STEP_NUM == _STEP_NUM_119)
@@ -84,7 +84,7 @@ static StepLL right = {
 	.in4p = GPIOB, .in4b = GPIO_PIN_7,
 
 	.step_idx = 0,
-	.period_ticks = 1000,
+	.period_ticks = 500,
 	.prev_tick = 0,
 	.odometry_steps = 0,
 	#if (_USE_STEP_NUM == _STEP_NUM_119)
