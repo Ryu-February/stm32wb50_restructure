@@ -346,7 +346,7 @@ void step_coast_stop(void)
 }
 
 
-uint32_t get_current_steps(void)
+uint32_t get_executed_steps(void)
 {
 	uint32_t l = left.odometry_steps; // single 32b read is atomic on M4
 	uint32_t r = right.odometry_steps;

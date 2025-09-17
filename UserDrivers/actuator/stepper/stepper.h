@@ -104,10 +104,11 @@ void step_set_period_ticks(uint32_t left_ticks, uint32_t right_ticks); // unit =
 void step_set_dir(int8_t left_sign, int8_t right_sign); // +1 or -1
 void step_stop(void); // brake both
 void step_coast_stop(void);
+void step_set_hold(hold_mode_t mode);
 
 
 // 4) Telemetry
-uint32_t get_current_steps(void);
+uint32_t get_executed_steps(void);
 void odometry_steps_init(void);
 
 

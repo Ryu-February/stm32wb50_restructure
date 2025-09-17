@@ -48,41 +48,41 @@ void ap_tim16_callback(void)
 {
 	rgb_set_color(detected_color);
 
-	if(detected_color == COLOR_BLACK)
-		return;
-
+//	if(detected_color == COLOR_BLACK)
+//		return;
+//
 	if(stepper_enable_evt != true)
 		return;
-
-	switch (detected_color)
-	{
-		case COLOR_RED :
-			step_drive(OP_REVERSE);
-			break;
-		case COLOR_YELLOW :
-			step_drive(OP_TURN_RIGHT);
-			break;
-		case COLOR_GREEN :
-			step_drive(OP_FORWARD);
-			break;
-		case COLOR_BLUE :
-			step_drive(OP_TURN_LEFT);
-			break;
-		default :
-			step_drive(OP_NONE);
-			break;
-	}
+//
+//	switch (detected_color)
+//	{
+//		case COLOR_RED :
+//			step_drive(OP_REVERSE);
+//			break;
+//		case COLOR_YELLOW :
+//			step_drive(OP_TURN_RIGHT);
+//			break;
+//		case COLOR_GREEN :
+//			step_drive(OP_FORWARD);
+//			break;
+//		case COLOR_BLUE :
+//			step_drive(OP_TURN_LEFT);
+//			break;
+//		default :
+//			step_drive(OP_NONE);
+//			break;
+//	}
 
 	step_tick_isr();
 
-	if(get_current_steps() >= 1200)
-	{
-		step_coast_stop();
-		step_idx_init();
-		odometry_steps_init();
-		detected_color = COLOR_BLACK;
-		stepper_enable_evt = false;
-	}
+//	if(get_executed_steps() >= 1200)
+//	{
+//		step_coast_stop();
+//		step_idx_init();
+//		odometry_steps_init();
+//		detected_color = COLOR_BLACK;
+//		stepper_enable_evt = false;
+//	}
 
 
 }

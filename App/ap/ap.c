@@ -21,9 +21,15 @@ extern volatile bool stepper_enable_evt;
 static bool init_printed = false;
 static uint8_t color_seq = 0;
 
+static color_t plan_color = COLOR_BLACK;
+
+volatile bool plan_armed = false;    // 1초 타이머 통과했는지 표시
+volatile bool after_1s_evt = false;
+
 static void ap_task_color_calibration(void);
 static void ap_task_color_detection(void);
 static void enable_stepper_after_1s(void);
+static void ap_motion_update(void);
 
 
 void ap_init(void)
@@ -67,6 +73,7 @@ void ap_main(void)
 		{
 			ap_task_color_detection();
 			enable_stepper_after_1s();
+			ap_motion_update();
 		}
 	}
 }
@@ -145,6 +152,9 @@ static void enable_stepper_after_1s(void)
 	if(detected_color == COLOR_BLACK)
 		return;
 
+	if(after_1s_evt == true)
+		return;
+
 	static uint32_t t = 0;
 	uint32_t now = millis();
 
@@ -154,6 +164,28 @@ static void enable_stepper_after_1s(void)
 	{
 		t = 0;
 		stepper_enable_evt = true;
+		after_1s_evt = true;
 	}
 }
 
+static void ap_motion_update(void)
+{
+	if(detected_color != COLOR_BLACK && stepper_enable_evt && !plan_armed)
+	{
+		plan_armed = true;
+		plan_color = (color_t)detected_color;
+		motion_plan_color(plan_color);
+//		stepper_enable_evt = false;
+	}
+
+	motion_service();
+
+	if(!plan_armed)
+	{
+
+	}
+	else
+	{
+
+	}
+}
