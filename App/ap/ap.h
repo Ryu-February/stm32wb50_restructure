@@ -22,6 +22,7 @@
 #include "input.h"
 #include "motion.h"
 #include "stepper.h"
+#include "line_tracing.h"
 
 
 

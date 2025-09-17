@@ -25,10 +25,10 @@ static inline StepOperation color_to_op(color_t c)
 		case COLOR_YELLOW:   return OP_TURN_RIGHT;  // 전진
 		case COLOR_GREEN:    return OP_FORWARD;     // 우회전
 		case COLOR_BLUE:     return OP_TURN_LEFT;   // 후진
+		case COLOR_PURPLE:	 return OP_FORWARD;		//전진(라인트레이싱)
 		default:             return OP_STOP;        // ORANGE/PURPLE/... 전부 STOP
 	}
 }
-
 
 static const uint16_t kStepsByColor[COLOR_COUNT] =
 {
@@ -36,6 +36,7 @@ static const uint16_t kStepsByColor[COLOR_COUNT] =
     [COLOR_YELLOW]   = 1020,
     [COLOR_GREEN]    = 1500,
     [COLOR_BLUE]     = 1020,
+	[COLOR_PURPLE]	 = 5000,
     // ORANGE, PURPLE, ... 등은 0으로 남음
 };
 
@@ -66,9 +67,6 @@ void motion_plan_color(color_t c)
 
 	StepOperation op = color_to_op(c);
 	uint16_t goal	 = kStepsByColor[c];
-
-	uart_printf("goal_steps: %d \r\n", goal);
-	uart_printf("op: %d \r\n", op);
 
 	if (op == OP_STOP || goal == 0)
 	{

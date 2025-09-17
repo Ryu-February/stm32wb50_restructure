@@ -15,10 +15,10 @@
 reference_entry_t color_reference_tbl_left[COLOR_COUNT];
 reference_entry_t color_reference_tbl_right[COLOR_COUNT];
 
-extern uint8_t offset_side;
-extern uint16_t offset_black;
-extern uint16_t offset_white;
-extern uint16_t offset_average;
+uint8_t offset_side;
+uint16_t offset_black;
+uint16_t offset_white;
+uint16_t offset_average;
 
 
 color_mode_t insert_queue[MAX_INSERTED_COMMANDS];
@@ -197,8 +197,8 @@ void debug_print_color_reference_table(void)
                     e.raw.red_raw, e.raw.green_raw, e.raw.blue_raw, e.offset);
     }
     uart_printf("=== BRIGHTNESS OFFSET TABLE ===\r\n");
-//    uart_printf("offset_black: %d | offset_white: %d\r\n", offset_black, offset_white);
-//	uart_printf("offset_aver: %d\r\n", offset_average);
+    uart_printf("offset_black: %d | offset_white: %d\r\n", offset_black, offset_white);
+	uart_printf("offset_aver: %d\r\n", offset_average);
 }
 
 uint32_t calculate_brightness(uint16_t r, uint16_t g, uint16_t b)

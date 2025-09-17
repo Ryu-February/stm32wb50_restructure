@@ -26,10 +26,19 @@ static color_t plan_color = COLOR_BLACK;
 volatile bool plan_armed = false;    // 1초 타이머 통과했는지 표시
 volatile bool after_1s_evt = false;
 
+extern volatile uint32_t timer17_ms;
+
 static void ap_task_color_calibration(void);
 static void ap_task_color_detection(void);
 static void enable_stepper_after_1s(void);
 static void ap_motion_update(void);
+
+const lt_config_t lt =
+{
+	.Kp = 20.f, .Ki = 0.f, .Kd = 15.f,
+	.base_ticks = 1500, .min_ticks = 500, .max_ticks = 2500,
+	.interval_ms = 5
+};
 
 
 void ap_init(void)
@@ -42,12 +51,15 @@ void ap_init(void)
 	color_init();
 //	step_motor_init();
 	step_init_all();
+    line_tracing_init(&lt);
+    line_tracing_enable(false);
 
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start_IT(&htim16);
 	HAL_TIM_Base_Start_IT(&htim17);
 
 	load_color_reference_table();
+	calculate_color_brightness_offset();
 	debug_print_color_reference_table();
 }
 
@@ -188,4 +200,45 @@ static void ap_motion_update(void)
 	{
 
 	}
+
+	// 보라색이면: 1초 유지 이벤트가 떴을 때 라인트레이싱 시작
+	if (!line_tracing_enabled())
+	{
+		if (detected_color == COLOR_PURPLE)
+		{
+			if (stepper_enable_evt)
+			{
+				uart_printf("[LT] Start by PURPLE card.\r\n");
+				line_tracing_enable(true);
+//				stepper_enable_evt = false;   // 이벤트 소모
+			}
+		}
+	}
+	else
+	{
+//		uart_printf("in line-tracing mode\r\n");
+		// 라인트레이싱이 이미 켜져 있을 때:
+		//  - 계속 업데이트
+		//  - 보라/검정이 아닌 다른 색이 1초 유지되면 라인트레이싱 종료
+		line_tracing_update(timer17_ms);
+
+		if (detected_color != COLOR_PURPLE && detected_color != COLOR_BLACK)
+		{
+			if (stepper_enable_evt)
+			{
+				uart_printf("[LT] Stop (another color card detected).\r\n");
+				line_tracing_enable(false);
+				stepper_enable_evt = false;
+			}
+		}
+		// 검정이면 그대로 유지(라인 위에서 센서 상황에 따라 카드가 안 보일 수 있으니 유지)
+		return;
+	}
 }
+
+/*
+static void ap_card_mode(void)
+{
+
+}
+*/
