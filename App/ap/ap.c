@@ -198,11 +198,13 @@ static void ap_motion_update(void)
 	// --- 카드 모드: 실행할 계획이 있으면 최우선으로 태움 ---
 	color_t plan_color_cm;
 
-	if (stepper_enable_evt && !plan_armed && card_mode_get_next_plan(&plan_color_cm))
+	if (/*stepper_enable_evt && */!plan_armed && card_mode_get_next_plan(&plan_color_cm))
 	{
 		plan_armed = true;
 		motion_plan_color(plan_color_cm);
 		card_mode_on_motion_started();
+
+		uart_printf("[AP] CARD plan armed: %s\r\n", color_to_string(plan_color_cm));
 	}
 
 	// --- 기존: 단일 색 발견 시 계획 태움 (카드모드가 없는 경우/동시에 안 걸리도록 plan_armed 체크) ---
@@ -231,6 +233,8 @@ static void ap_motion_update(void)
     {
         plan_armed = false;
         card_mode_on_motion_finished();
+
+        uart_printf("[AP] plan finished\r\n");
     }
 
 	// 보라색이면: 1초 유지 이벤트가 떴을 때 라인트레이싱 시작
@@ -269,6 +273,8 @@ static void ap_motion_update(void)
 		// 검정이면 그대로 유지(라인 위에서 센서 상황에 따라 카드가 안 보일 수 있으니 유지)
 		return;
 	}
+
+
 }
 
 /*

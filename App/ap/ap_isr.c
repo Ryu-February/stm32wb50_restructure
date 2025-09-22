@@ -54,8 +54,8 @@ void ap_tim16_callback(void)
 //	if(detected_color == COLOR_BLACK)
 //		return;
 //
-	if(stepper_enable_evt != true)
-		return;
+//	if(stepper_enable_evt != true)
+//		return;
 
 	bool allow_tick = false;
 

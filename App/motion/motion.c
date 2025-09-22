@@ -116,3 +116,7 @@ bool motion_is_running(void)
     return g_plan.running;
 }
 
+uint32_t get_goal_steps(void)
+{
+	return g_plan.goal_steps;
+}

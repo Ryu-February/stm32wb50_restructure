@@ -8,10 +8,11 @@
 
 #include "card_mode.h"
 #include "uart.h"
+#include "stepper.h"
 
 extern volatile bool after_1s_evt;
 extern volatile bool stepper_enable_evt;
-
+extern volatile bool plan_armed;    // 1초 타이머 통과했는지 표시
 
 typedef enum
 {
