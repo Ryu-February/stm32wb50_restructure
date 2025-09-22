@@ -10,12 +10,15 @@
 #include "rgb.h"
 #include "color.h"
 #include "input.h"
+#include "motion.h"
 #include "stepper.h"
+#include "card_mode.h"
 
 volatile uint32_t timer17_ms;
 volatile bool check_color;
 
 extern volatile uint8_t detected_color;
+extern volatile bool after_1s_evt;
 volatile bool stepper_enable_evt = false;
 
 
@@ -52,6 +55,23 @@ void ap_tim16_callback(void)
 //		return;
 //
 	if(stepper_enable_evt != true)
+		return;
+
+	bool allow_tick = false;
+
+	if(card_mode_is_running() && after_1s_evt)
+	{
+		allow_tick = true;
+	}
+	else if (!card_mode_is_programming())
+	{
+		if(motion_is_running() || stepper_enable_evt)
+		{
+			allow_tick = true;
+		}
+	}
+
+	if (!allow_tick)
 		return;
 //
 //	switch (detected_color)

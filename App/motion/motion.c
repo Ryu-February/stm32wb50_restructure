@@ -32,10 +32,10 @@ static inline StepOperation color_to_op(color_t c)
 
 static const uint16_t kStepsByColor[COLOR_COUNT] =
 {
-    [COLOR_RED]      = 1500,
-    [COLOR_YELLOW]   = 1020,
-    [COLOR_GREEN]    = 1500,
-    [COLOR_BLUE]     = 1020,
+    [COLOR_RED]      = 2000,
+    [COLOR_YELLOW]   = 1050,
+    [COLOR_GREEN]    = 2000,
+    [COLOR_BLUE]     = 1050,
 	[COLOR_PURPLE]	 = 15000,
     // ORANGE, PURPLE, ... 등은 0으로 남음
 };
@@ -109,4 +109,10 @@ void motion_service(void)
     }
 }
 
+
+bool motion_is_running(void)
+{
+    // volatile 읽기: 단순 읽기만 해도 충분
+    return g_plan.running;
+}
 

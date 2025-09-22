@@ -33,6 +33,8 @@ static void ap_task_color_detection(void);
 static void enable_stepper_after_1s(void);
 static void ap_motion_update(void);
 
+extern bool motion_is_running(void);
+
 const lt_config_t lt =
 {
 	.Kp = 30.f, .Ki = 0.f, .Kd = 15.f,
@@ -53,6 +55,8 @@ void ap_init(void)
 	step_init_all();
     line_tracing_init(&lt);
     line_tracing_enable(false);
+
+    card_mode_init();
 
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_Base_Start_IT(&htim16);
@@ -144,10 +148,19 @@ static void ap_task_color_detection(void)
 	uint8_t left  = classify_color_side(BH1745_ADDR_LEFT);
 	uint8_t right = classify_color_side(BH1745_ADDR_RIGHT);
 
+    // (A) 항상 트리거 감지를 먼저 card_mode에 전달
+    card_mode_on_dual_colors(left, right);
+
+    // (B) 기존 동일색 판정
 	if (left == right)
 	{
 		detected_color = left;
 		uart_printf("cur_detected color: %s\r\n", color_to_string(left));
+
+		if (card_mode_is_active())
+		{
+			card_mode_on_detected_color((color_t)detected_color);
+		}
 	}
 	else
 	{
@@ -182,7 +195,18 @@ static void enable_stepper_after_1s(void)
 
 static void ap_motion_update(void)
 {
-	if(detected_color != COLOR_BLACK && stepper_enable_evt && !plan_armed)
+	// --- 카드 모드: 실행할 계획이 있으면 최우선으로 태움 ---
+	color_t plan_color_cm;
+
+	if (stepper_enable_evt && !plan_armed && card_mode_get_next_plan(&plan_color_cm))
+	{
+		plan_armed = true;
+		motion_plan_color(plan_color_cm);
+		card_mode_on_motion_started();
+	}
+
+	// --- 기존: 단일 색 발견 시 계획 태움 (카드모드가 없는 경우/동시에 안 걸리도록 plan_armed 체크) ---
+	if(!card_mode_is_active() && detected_color != COLOR_BLACK && stepper_enable_evt && !plan_armed)
 	{
 		plan_armed = true;
 		plan_color = (color_t)detected_color;
@@ -190,6 +214,7 @@ static void ap_motion_update(void)
 //		stepper_enable_evt = false;
 	}
 
+    // 주기적 서비스
 	motion_service();
 
 	if(!plan_armed)
@@ -200,6 +225,13 @@ static void ap_motion_update(void)
 	{
 
 	}
+
+    // 모션 완료 감지: 카드모드와 일반 모두 여기서 종료 처리
+    if (plan_armed && !motion_is_running())
+    {
+        plan_armed = false;
+        card_mode_on_motion_finished();
+    }
 
 	// 보라색이면: 1초 유지 이벤트가 떴을 때 라인트레이싱 시작
 	if (!line_tracing_enabled())
