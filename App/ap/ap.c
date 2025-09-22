@@ -237,6 +237,12 @@ static void ap_motion_update(void)
         uart_printf("[AP] plan finished\r\n");
     }
 
+
+    if(card_mode_is_active())
+    {
+    	return;
+    }
+
 	// 보라색이면: 1초 유지 이벤트가 떴을 때 라인트레이싱 시작
 	if (!line_tracing_enabled())
 	{

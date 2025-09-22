@@ -14,6 +14,16 @@ extern volatile bool after_1s_evt;
 extern volatile bool stepper_enable_evt;
 extern volatile bool plan_armed;    // 1초 타이머 통과했는지 표시
 
+extern uint32_t millis(void);
+
+
+// ===== 기존 static들에 아래 변수들 추가 =====
+static uint16_t  s_gap_ms        = 1000;   // 기본 1초
+static bool      s_gap_waiting   = false;
+static uint32_t  s_gap_deadline  = 0;
+
+
+
 typedef enum
 {
     CM_IDLE = 0,        // 모드 아님
@@ -104,6 +114,10 @@ void card_mode_init(void)
     s_state      = CM_IDLE;
     s_plan_ready = false;
     s_plan_color = COLOR_BLACK;
+
+    s_gap_ms       = 1000;
+	s_gap_waiting  = false;
+	s_gap_deadline = 0;
 
     /* 버퍼 */
     seq_clear();
@@ -250,6 +264,21 @@ bool card_mode_get_next_plan(color_t *plan_color_out)
         return false;
     }
 
+    // ★ 인터스텝 지연 체크: 대기 중이면 아직 plan을 안 준다
+	if (s_gap_waiting)
+	{
+		uint32_t now = millis();
+		// uint32_t 오버플로우는 자연 감산 비교로도 보정 가능하지만
+		// 여기선 단순 비교로 충분(1초 수준)
+		if ((int32_t)(now - s_gap_deadline) < 0)
+		{
+			return false;  // 아직 대기 중
+		}
+
+		// 대기 완료
+		s_gap_waiting = false;
+	}
+
     if (s_plan_ready)
     {
         // 아직 ap가 plan_started 콜백으로 소비 안 했으면 그대로 둠
@@ -304,9 +333,29 @@ void card_mode_on_motion_started(void)
 
 void card_mode_on_motion_finished(void)
 {
-    // ap에서 모션 완료 알림을 받았지만, 다음 계획은
-    // card_mode_get_next_plan()이 다음 루프에서 다시 공급
-    // 여기서는 특별히 할 일 없음.
+    // 기존: RUN 끝나면 reset만 하거나, 다음으로 넘어가게 했었음
+    // 여기서 "다음 plan을 내주기 전에 s_gap_ms 만큼 기다리도록" 플래그만 세운다.
+
+    // 실행 중이 아니면 무시
+    if (!(s_active && (s_state == CM_RUNNING)))
+    {
+        return;
+    }
+
+    // 아직 실행 버퍼가 남아 있는지 확인
+    // 주의: s_exec_idx는 card_mode_on_motion_started()에서 이미 +1 되었음
+    if (s_exec_idx < s_len)
+    {
+        // 다음 plan 앞서 "대기"
+        s_gap_waiting  = true;
+        s_gap_deadline = millis() + (uint32_t)s_gap_ms;
+        uart_printf("[CARD] Gap %ums before next step.\r\n", (unsigned)s_gap_ms);
+        return;
+    }
+
+    // 모두 소비 완료 → 종료
+    uart_printf("[CARD] RUN finished.\r\n");
+    card_mode_reset();
 }
 
 
@@ -318,4 +367,14 @@ bool card_mode_is_programming(void)
 bool card_mode_is_running(void)
 {
     return s_active && (s_state == CM_RUNNING);
+}
+
+void card_mode_set_interstep_delay_ms(uint16_t ms)
+{
+    s_gap_ms = ms;
+}
+
+uint16_t card_mode_get_interstep_delay_ms(void)
+{
+    return s_gap_ms;
 }
